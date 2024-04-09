@@ -7,13 +7,7 @@ import { toast } from "react-hot-toast";
 import { useParams, useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuLabel, 
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
+import {  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertModal } from "@/components/modals/alert-modal";
 
 import { BillboardColumn } from "./columns";
@@ -37,7 +31,7 @@ export const CellAction: React.FC<CellActionProps> = ({
       toast.success('Billboard deleted.');
       router.refresh();
     } catch (error) {
-      toast.error('Make sure you removed all categories using this billboard first.');
+      toast.error('Make sure you remove all categories using this billboard first.');
     } finally {
       setOpen(false);
       setLoading(false);
@@ -60,7 +54,7 @@ export const CellAction: React.FC<CellActionProps> = ({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Open menu</span>
+            <span className="sr-only">Open Menu</span>
             <MoreHorizontal className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
