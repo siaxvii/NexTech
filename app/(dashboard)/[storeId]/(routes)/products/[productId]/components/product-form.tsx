@@ -28,7 +28,8 @@ const formSchema = z.object({
   categoryId: z.string().min(1),
   colorId: z.string().min(1),
   isFeatured: z.boolean().default(false).optional(),
-  isArchived: z.boolean().default(false).optional()
+  isDiscounted: z.boolean().default(false).optional(),
+  discountPercentage: z.coerce.number().min(0).max(100),
 });
 
 type ProductFormValues = z.infer<typeof formSchema>
@@ -48,6 +49,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 }) => {
   const params = useParams();
   const router = useRouter();
+  const [selectedColors, setSelectedColors] = useState<string[]>(initialData?.colorId ? [initialData.colorId] : []);
 
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -60,6 +62,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const defaultValues = initialData ? {
     ...initialData,
     price: parseFloat(String(initialData?.price)),
+    discountPercentage: parseFloat(String(initialData?.discountPercentage)),
+    // discountPercentage: initialData.discountPercentage !== null ? Number(initialData.discountPercentage) : undefined // Convert Decimal or null to number or undefined
   } : {
     name: '',
     description: '',
@@ -68,7 +72,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     categoryId: '',
     colorId: '',
     isFeatured: false,
-    isArchived: false,
+    isDiscounted: false,
+    discountPercentage: 0,
   }
 
   const form = useForm<ProductFormValues>({
@@ -79,10 +84,14 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const onSubmit = async (data: ProductFormValues) => {
     try {
       setLoading(true);
+      const formData = {
+        ...data,
+      };
+
       if (initialData) {
-        await axios.patch(`/api/${params.storeId}/products/${params.productId}`, data);
+        await axios.patch(`/api/${params.storeId}/products/${params.productId}`, formData);
       } else {
-        await axios.post(`/api/${params.storeId}/products`, data);
+        await axios.post(`/api/${params.storeId}/products`, formData);
       }
       router.refresh();
       router.push(`/${params.storeId}/products`);
@@ -219,7 +228,16 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Color</FormLabel>
-                  <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                  <Select
+                      disabled={loading}
+                      onValueChange={(newValue) => {
+                        const updatedColors = newValue ? [...selectedColors, newValue] : selectedColors;
+                        setSelectedColors(updatedColors);
+                        field.onChange(newValue); // Update the form field value
+                      }}
+                      value={field.value}
+                      defaultValue={field.value}
+                    >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue defaultValue={field.value} placeholder="Select a color" />
@@ -260,7 +278,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             />
             <FormField
               control={form.control}
-              name="isArchived"
+              name="isDiscounted"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                   <FormControl>
@@ -272,12 +290,25 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                   </FormControl>
                   <div className="space-y-1 leading-none">
                     <FormLabel>
-                      Archived
+                      Discounted
                     </FormLabel>
                     <FormDescription>
-                      This product will not appear anywhere in the store.
+                      This product will appear in the discounts section.
                     </FormDescription>
                   </div>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="discountPercentage"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Discount Percentage</FormLabel>
+                  <FormControl>
+                    <Input type="number" disabled={loading} placeholder="Enter discount %" {...field} />
+                  </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />

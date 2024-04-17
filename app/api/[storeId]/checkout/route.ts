@@ -34,6 +34,8 @@ export async function POST(
 
   const line_items: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
 
+
+
   products.forEach((product) => {
     line_items.push({
       quantity: 1,
@@ -42,7 +44,8 @@ export async function POST(
         product_data: {
           name: product.name,
         },
-        unit_amount: product.price.toNumber() * 100,
+        unit_amount: product.isDiscounted
+        ? (+product.price * (1- +product.discountPercentage / 100) * 100) : (+product.price * 100),
       },
     });
   });
