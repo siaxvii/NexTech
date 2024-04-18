@@ -96,6 +96,7 @@ export async function GET(
     const isFeatured = searchParams.get('isFeatured');
     const isDiscounted = searchParams.get('isDiscounted');
     const sortBy = searchParams.get('sortBy');
+    const search = searchParams.get('search') || undefined;
 
     if (!params.storeId) {
       return new NextResponse("Store ID is required", { status: 400 });
@@ -108,6 +109,10 @@ export async function GET(
         colorId,
         isFeatured: isFeatured ? true : undefined,
         isDiscounted: isDiscounted ? true : undefined,
+        name: {
+          contains: search,
+          mode: 'insensitive',
+        },
       },
       include: {
         images: true,
