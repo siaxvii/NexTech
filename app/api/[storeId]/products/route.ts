@@ -109,10 +109,22 @@ export async function GET(
         colorId,
         isFeatured: isFeatured ? true : undefined,
         isDiscounted: isDiscounted ? true : undefined,
-        name: {
-          contains: search,
-          mode: 'insensitive',
-        },
+        OR: [
+          {
+            name: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            category: {
+              name: {
+                contains: search,
+                mode: 'insensitive',
+              },
+            },
+          },
+        ],
       },
       include: {
         images: true,
